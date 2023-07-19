@@ -215,7 +215,13 @@ class ConfigDevice():
     def _reset(self, config_reset):
         port_map = config_reset['arg_port_map']
         L.debug("ConfigDevice::_reset device reset_config ...")
-        return self.device.reset_config(port_map)
+        self.device.reset_config(port_map)
+
+        if ('admin_password' in config_reset):
+            L.info("ConfigOpenwrt::reset setup root pw")
+            self.device.set_root_passwd(config_reset['admin_password'])
+
+        return True
 
     def reset(self, config_reset):
         if not self._reset(config_reset):
@@ -290,10 +296,6 @@ class ConfigOpenwrt(ConfigDevice):
         if not super()._reset(config_reset):
             L.error("ConfigDevice::_reset super()._reset error")
             return False
-
-        if ('admin_password' in config_reset):
-            L.info("ConfigOpenwrt::reset setup root pw")
-            self.device.set_root_passwd(config_reset['admin_password'])
 
         L.info("ConfigOpenwrt::reset set timezone")
         self.device.set_timezone()

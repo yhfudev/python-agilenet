@@ -107,6 +107,13 @@ class Switch():
         raise NotImplementedError()
         return None
 
+    ## set the root password
+    #  @param self The object pointer.
+    #  @param root_pw The password.
+    def set_root_passwd(self, root_pw):
+        raise NotImplementedError()
+        return False
+
     ## set current time to device
     #  @param self The object pointer.
     def set_clock(self):

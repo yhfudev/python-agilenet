@@ -586,7 +586,7 @@ def get_hw_wifi_number(str_msg):
 #  @param is_dsa True if the board support Linux DSA
 #  @param trunk_bridge_device_name the bridge for DSA interfaces
 #  @return a list of config command strings
-def getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname=None, num_wifi=0, is_dsa=False, create_wan=False, has_subnet_ips=True, trunk_bridge_device_name = 'br-lan'):
+def getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname=None, num_wifi=0, is_dsa=False, create_wan=False, has_subnet_ips=True, default_passwd="", trunk_bridge_device_name = 'br-lan'):
     # TODO: new DSA bridge-vlan
 
     #L.info("getconf_interfaces with cb = {0}".format(cb_vlan_ifname))
@@ -598,11 +598,15 @@ def getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 """
-        if len(port_map) < 3:
-            # setup a wifi for lan, the hostname as wifi name, and the key 'abcd1234' as the key
-            ssid_lan = hostname
-            key_lan = "abcd1234"
-            cmd_intf += """
+
+        # setup a wifi for lan, the hostname as wifi name, and the key 'abcd1234' as the key
+        ssid_lan = hostname
+        key_lan = default_passwd
+        if not key_lan:
+            L.error("not set password.")
+            key_lan = "password"
+            L.error("the WiFi '{0}' access password was set to default '{1}'".format(ssid_lan, key_lan))
+        cmd_intf += """
 set wireless.@wifi-iface[-1].disabled=0
 set wireless.@wifi-iface[-1].mode='ap'
 set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
@@ -627,6 +631,8 @@ set wireless.@wifi-iface[-2].ft_over_ds='0'
 set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
 """.format(0, 'lan', ssid_lan, key_lan)
 
+        # if there's no enough port for LAN, or is for a edge wifi
+        if (len(port_map) < 3) or (not has_subnet_ips):
             cmd_intf += """
 set wireless.@wifi-device[0].disabled=0
 set wireless.@wifi-device[1].disabled=0
@@ -1099,7 +1105,8 @@ class OpenwrtSwitch(Switch):
     # reboot system
     def reboot(self, wait_network=True):
         L.info("reboot -f ...")
-        self.pexp.sendline('sync; reboot -f; reboot\n')
+        self.pexp.sendline('sync')
+        self.pexp.sendline('reboot -f')
         self.pexp.expect('reboot: Restarting system')
         L.info("reboot starting ...")
         self.pexp.expect('Please press Enter to activate this console.')
@@ -1462,8 +1469,10 @@ set network.@device[-1].type='bridge'
         if 0 == ret:
             return parse_clock_openwrt(ln_before)
         return None
-
+    root_passwd = None
     def set_root_passwd(self, new_passwd):
+        self.root_passwd = new_passwd
+
         #self.pexp.sendcontrol('c')
         self.pexp.sendline("\ncd /\n")
 
@@ -1510,8 +1519,9 @@ commit network
         tm_start = datetime.now()
         while True:
             L.info("_wait_connected() ping ...")
-            self.pexp.sendline('ping -c 2 openwrt.org')
-            expect_list = ['2 packets transmitted, 2 packets received,', 'ping: sendto: Permission denied', "ping: bad address 'google.com'", 'ping: sendto: Network unreachable']
+            url_test = "openwrt.org"
+            self.pexp.sendline('ping -c 2 {0}'.format(url_test))
+            expect_list = ['2 packets transmitted, 2 packets received,', 'ping: sendto: Permission denied', "ping: bad address '{0}'".format(url_test), 'ping: sendto: Network unreachable']
             ret = self.pexp.expect(expect_list)
             L.debug(f"ping return [{ret}]={expect_list[ret]}")
             if ret == 0:
@@ -1794,7 +1804,7 @@ head -n -0 /etc/resolv.* /tmp/resolv.*
         hostname = self.get_hostname()
 
         #L.debug(f"try to setup ipaddr_lan={ipaddr_lan}; interface_config={interface_config}; cb_vlan_ifname={cb_vlan_ifname}; num_wifi={num_wifi}")
-        cmd_list = getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname, num_wifi, is_dsa=self._is_dsa(), create_wan=create_wan, has_subnet_ips=has_subnet_ips, trunk_bridge_device_name = self.br_trunk)
+        cmd_list = getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname, num_wifi, is_dsa=self._is_dsa(), create_wan=create_wan, has_subnet_ips=has_subnet_ips, default_passwd=self.root_passwd, trunk_bridge_device_name = self.br_trunk)
         return execute_uci_command_list(self.pexp, prompt, cmd_list)
 
 
