@@ -1,0 +1,65 @@
+{
+  /**
+   * a edge switch to bridge WiFi APs to main router
+   */
+
+  "serial": "/dev/ttyUSB0", "baud": 115200,
+  //"ipaddr": "localhost", "port": 6000,
+
+  //"admin_password": "abcd1234",
+
+  "name": "OpenWrt Edge on Linksys EA7500 v2",
+
+  "arg_hostname": "rt-wifiap-ow9", // the hostname of the device
+  "arg_local_addr": "192.168.23.0/24", // the ip blocks for LAN
+
+  "arg_interface_config": { // the openwrt interface config
+    // name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]],
+    "office":   [  2010, "", "Office", "pw4offic", []],
+    "game":     [  2020, "", "Game",   "pw4game1", []],
+    "iotapp":   [  2030, "", "IoT",    "pw4iot#!", []],
+    "surve":    [  2040, "", "", "", []],
+    "guest":    [  2050, "", "Guest",  "myGuest!", []],
+  },
+  "extra_packets": [
+    "luci-ssl", "uhttpd", "ip-full", "ip-bridge", "gawk", // HTTPS and base
+    //"bash",
+    "diffutils",
+    //"block-mount",
+    //"conntrack", "owipcalc", "etherwake", "uuidgen", // for bash-powerautosave
+    "tcpdump", "iperf3", "curl", // network tests
+  ],
+
+/** config for Linksys EA7500 v2
+ * +--------+--------+--------+--------+--------+--------+
+ * | ------ |  WAN   |   1    |   2    |   3    |   4    |
+ * +--------+--------+--------+--------+--------+--------+
+ * |  CPU   |  WAN   | LAN 1  | LAN 2  | LAN 3  | LAN 4  |
+ * +--------+--------+--------+--------+--------+--------+
+ * |  ----  |  wan   |  lan1  |  lan2  |  lan3  |  lan4  |
+ * +--------+--------+--------+--------+--------+--------+
+ */
+  "driver": "openwrtuci",
+  "arg_is_gns3": false,
+  "arg_has_hw_switch": true,
+  "arg_port_map": { // the external port names to internal switch port num
+    // name: [ switch_port, device, ]
+    "CPU": [ null, null, ], // CPU (eth0) for LAN
+    "WAN": [  "wan", "eth0", ], // the physical port for WAN
+      "1": [ "lan1", "eth0", ], // the physical port for LAN1
+      "2": [ "lan2", "eth0", ], // the physical port for LAN2
+      "3": [ "lan3", "eth0", ], // the physical port for LAN3
+      "4": [ "lan4", "eth0", ], // the physical port for LAN4
+  },
+
+  "arg_port_vlan": { // the external port names to VLAN
+    // name: VLAN // VLAN 0: tagged, 1-4095 untagged, -1 off
+    "CPU":  0, // CPU (eth1) for LAN
+    "WAN":  0, // the physical port for WAN
+      "1":  2010, // the physical port for LAN1
+      "2":  2020, // the physical port for LAN2
+      "3":  2030, // the physical port for LAN3
+      "4":  2040, // the physical port for LAN4
+  },
+
+}

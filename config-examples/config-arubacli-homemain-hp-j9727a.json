@@ -1,0 +1,32 @@
+{
+  "serial": "/dev/ttyUSB2", "baud": 9600,
+  //"ipaddr": "localhost", "port": 6003,
+
+  //"admin_password": "abcd1234",
+
+  "name": "Homemain switch on HP/Aruba ProCurve J9727A",
+
+  "arg_hostname": "sw-homemain-hp1", // the hostname of the device
+  "arg_local_addr": "192.168.16.0/24", // the ip blocks for LAN
+
+  "arg_interface_config": { // the openwrt interface config
+    // name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]],
+    "office":   [  2010, "", "", "", []],
+    "game":     [  2020, "", "", "", []],
+    "iotapp":   [  2030, "", "", "", []],
+    "surve":    [  2040, "", "", "", []],
+    "guest":    [  2050, "", "", "", []],
+  },
+
+/** config for switch HP/Aruba ProCurve J9727A
+ */
+  "driver": "arubacli",
+  "arg_is_gns3": false,
+  //"arg_has_hw_switch": true, // ignored
+  "arg_port_map": { // the external port names to internal port num/name
+     "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "23", "24": "24"
+  },
+  "arg_port_list": [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", ], // the ports need to be configured
+  "arg_vlan_list": [  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010,  2010, 2040, 2040, 2040, 2040, 0, 0, 0, 0, ], // the vlan id for each port to be configured
+}
+

@@ -1,0 +1,65 @@
+{
+  /**
+   * a edge switch to bridge WiFi APs to main router
+   */
+
+  "serial": "/dev/ttyUSB0", "baud": 57600,
+  //"ipaddr": "localhost", "port": 6000,
+
+  //"admin_password": "abcd1234",
+
+  "name": "OpenWrt Edge on Asus RT-N56U",
+
+  "arg_hostname": "rt-wifiap-ow7", // the hostname of the device
+  "arg_local_addr": "192.168.21.0/24", // the ip blocks for LAN
+
+  "arg_interface_config": { // the openwrt interface config
+    // name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]],
+    "office":   [  2010, "", "Office", "pw4offic", []],
+    "game":     [  2020, "", "Game",   "pw4game1", []],
+    "iotapp":   [  2030, "", "IoT",    "pw4iot#!", []],
+    "guest":    [  2050, "", "Guest",  "myGuest!", []],
+  },
+  "extra_packets": [
+    "luci-ssl", "uhttpd", "ip-full", "ip-bridge", "gawk", // HTTPS and base
+    //"bash",
+    "diffutils",
+    //"block-mount",
+    //"conntrack", "owipcalc", "etherwake", "uuidgen", // for bash-powerautosave
+    "tcpdump", "iperf3", "curl", // network tests; space limited
+  ],
+
+/** config for Asus RT-N56U
+ * +--------+--------+--------+--------+--------+--------+
+ * | ------ |  WAN   |   1    |   2    |   3    |   4    |
+ * +--------+--------+--------+--------+--------+--------+
+ * |  CPU   |  WAN   | LAN 4  | LAN 3  | LAN 2  | LAN 1  |
+ * +--------+--------+--------+--------+--------+--------+
+ * | port 8 | port 4 | port 3 | port 2 | port 1 | port 0 |
+ * +--------+--------+--------+--------+--------+--------+
+ */
+  "driver": "openwrtuci",
+  "arg_is_gns3": false,
+  "arg_has_hw_switch": true,
+  "arg_port_map": { // the external port names to internal switch port num
+    // name: [ switch_port, device, ]
+    "CPU": [ 8, "eth0" ],
+    "WAN": [ 4, "eth0" ],
+      "1": [ 3, "eth0" ],
+      "2": [ 2, "eth0" ],
+      "3": [ 1, "eth0" ],
+      "4": [ 0, "eth0" ],
+  },
+
+  "arg_port_vlan": { // the external port names to VLAN
+    // name: VLAN // VLAN 0: tagged, 1-4095 untagged, -1 off
+    "CPU":  0, // CPU (eth1) for LAN
+    "WAN":  0, // the physical port for WAN
+      "1":  2010, // the physical port for LAN1
+      "2":  2010, // the physical port for LAN2
+      "3":  2010, // the physical port for LAN3
+      "4":  2020, // the physical port for LAN4
+  },
+
+}
+

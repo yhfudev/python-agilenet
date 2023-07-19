@@ -1,0 +1,40 @@
+{
+  "serial": "/dev/ttyUSB0", "baud": 9600,
+  //"ipaddr": "localhost", "port": 6000,
+
+  //"admin_password": "abcd1234",
+
+  "name": "Edge switch on Cisco WS-C2960 switch",
+
+  "arg_hostname": "sw-edge-cisco1", // the hostname of the device
+  "arg_local_addr": "192.168.16.0/24", // the ip blocks for LAN
+
+  "arg_interface_config": { // the openwrt interface config
+    // name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]],
+    "office":   [  2010, "", "", "", []],
+    "game":     [  2020, "", "", "", []],
+    "iotapp":   [  2030, "", "", "", []],
+    "surve":    [  2040, "", "", "", []],
+    "guest":    [  2050, "", "", "", []],
+  },
+
+/** config for switch Cisco WS-C2960
+ */
+  "driver": "ciscoios",
+  "arg_is_gns3": false,
+  "arg_has_hw_switch": true,
+  "arg_port_map": { // the external port names to internal port num/name
+     "WAN": "G0/1",
+    "LAN1": "F0/1",
+    "LAN2": "F0/2",
+    "LAN3": "F0/3",
+    "LAN4": "F0/4",
+    "LAN5": "F0/5",
+    "LAN6": "F0/6",
+    "LAN7": "F0/7",
+    "LAN8": "F0/8",
+  },
+  "arg_port_list": [ "LAN1", "LAN2", "LAN3", "LAN4", "LAN5", "LAN6", "LAN7", "LAN8", "WAN", ], // the ports need to be configured
+  "arg_vlan_list": [     2010,     2010,     2010,     2040,     2040,     2040,      0,      0,     0, ], // the vlan id for each port to be configured
+}
+

@@ -1,0 +1,67 @@
+{
+  /**
+   * a edge switch to bridge WiFi APs to main router
+   */
+
+  "serial": "/dev/ttyUSB0", "baud": 115200,
+  //"ipaddr": "localhost", "port": 6000,
+
+  //"admin_password": "abcd1234",
+
+  "name": "OpenWrt Edge on TP-Link Archer C7 v2",
+
+  "arg_hostname": "rt-wifiap-ow11", // the hostname of the device
+  "arg_local_addr": "192.168.25.0/24", // the ip blocks for LAN
+
+  "arg_interface_config": { // the openwrt interface config
+    // name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]],
+    "office":   [  2010, "", "Office", "pw4offic", []],
+    "game":     [  2020, "", "Game",   "pw4game1", []],
+    "iotapp":   [  2030, "", "IoT",    "pw4iot#!", []],
+    "surve":    [  2040, "", "", "", []],
+    "guest":    [  2050, "", "Guest",  "myGuest!", []],
+  },
+  "extra_packets": [
+    "luci-ssl", "uhttpd", "ip-full", "ip-bridge", "gawk", // HTTPS and base
+    //"bash",
+    "diffutils",
+    //"block-mount",
+    //"conntrack", "owipcalc", "etherwake", "uuidgen", // for bash-powerautosave
+    "tcpdump", "iperf3", "curl", // network tests
+  ],
+
+/** config for TP-Link Archer C7 v2
+ * +--------+--------+--------+--------+--------+--------+--------+
+ * | ------ |  WAN   |   1    |   2    |   3    |   4    |  ----  |
+ * +--------+--------+--------+--------+--------+--------+--------+
+ * |  CPU   |  WAN   | LAN 1  | LAN 2  | LAN 3  | LAN 4  |  CPU2  |
+ * +--------+--------+--------+--------+--------+--------+--------+
+ * | port 0 | port 1 | port 2 | port 3 | port 4 | port 5 | port 6 |
+ * +--------+--------+--------+--------+--------+--------+--------+
+ */
+ "driver": "openwrtuci",
+ "arg_is_gns3": false,
+ "arg_has_hw_switch": true,
+ "arg_port_map": { // the external port names to internal switch port num
+    // name: [ switch_port, device, ]
+    "CPU": [ 0, "eth1", ], // CPU (eth1) for LAN
+    "WAN": [ 1, "eth0", ], // the physical port for WAN
+      "1": [ 2, "eth1", ], // the physical port for LAN1
+      "2": [ 3, "eth1", ], // the physical port for LAN2
+      "3": [ 4, "eth1", ], // the physical port for LAN3
+      "4": [ 5, "eth1", ], // the physical port for LAN4
+   "CPU2": [ 6, "eth0", ], // CPU (eth0) for WAN
+  },
+
+  "arg_port_vlan": { // the external port names to VLAN
+    // name: VLAN // VLAN 0: tagged, 1-4095 untagged, -1 off
+    "CPU":  0, // CPU (eth1) for LAN
+    "WAN":  0, // the physical port for WAN
+      "1": 2010, // the physical port for LAN1
+      "2": 2020, // the physical port for LAN2
+      "3": 2030, // the physical port for LAN3
+      "4": 2040, // the physical port for LAN4
+   "CPU2":  0, // CPU (eth0) for WAN
+  },
+
+}

@@ -1,0 +1,48 @@
+{
+  //"serial": "/dev/ttyUSB1", "baud": 9600,
+  "ipaddr": "localhost", "port": 5018,
+  // "virsh_url": "qemu+ssh://username@192.168.1.105/system", "virsh_name": "openwrt-test",
+
+  //"admin_password": "abcd1234",
+
+  "name": "Edge switch on GNS3 Cisco switch",
+
+  "arg_hostname": "sw-edge-gns3cisco1", // the hostname of the device
+  "arg_local_addr": "192.168.16.0/24", // the ip blocks for LAN
+
+  "arg_interface_config": { // the openwrt interface config
+    // name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]],
+    "office":   [  2010, "", "", "", []],
+    "game":     [  2020, "", "", "", []],
+    "iotapp":   [  2030, "", "", "", []],
+    "surve":    [  2040, "", "", "", []],
+    "guest":    [  2050, "", "", "", []],
+  },
+
+/** config for GNS3 Cisco SW
+ */
+  "driver": "ciscoios",
+  "arg_is_gns3": false,
+  //"arg_has_hw_switch": true, // ignored
+  "arg_port_map": { // the external port names to internal port num/name
+    "LAN0": "F0/0",
+    "LAN1": "F0/1",
+    "LAN2": "F0/2",
+    "LAN3": "F0/3",
+    "LAN4": "F0/4",
+    "LAN5": "F0/5",
+    "LAN6": "F0/6",
+    "LAN7": "F0/7",
+    "LAN8": "F0/8",
+    "LAN9": "F0/9",
+    "LAN10": "F0/10",
+    "LAN11": "F0/11",
+    "LAN12": "F0/12",
+    "LAN13": "F0/13",
+    "LAN14": "F0/14",
+    "LAN15": "F0/15",
+  },
+  "arg_port_list": [ "LAN0", "LAN1", "LAN2", "LAN3", "LAN4", "LAN5", "LAN6", "LAN7", "LAN8", "LAN9", "LAN10", "LAN11", "LAN12", "LAN13", "LAN14", "LAN15", ], // the ports need to be configured
+  "arg_vlan_list": [      0,     2010,     2010,     2010,     2010,     2010,     2010,     2010,     2010,     2010,      2040,      2040,      2040,      0,       0,       0, ], // the vlan id for each port to be configured
+}
+

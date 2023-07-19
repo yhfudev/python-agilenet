@@ -1,0 +1,110 @@
+{
+  /**
+   * a main router connect to Internet
+   */
+
+  //"serial": "/dev/ttyUSB0", "baud": 115200,
+  //"ipaddr": "localhost", "port": 6000,
+  //"virsh_url": "qemu+ssh://username@192.168.220.105/system", "virsh_name": "openwrt-main",
+  //"virsh_name": "openwrt-main",
+  "virsh_url": "qemu+ssh://yhfu@192.168.220.102/system", "virsh_name": "openwrt-main",
+
+  //"admin_password": "abcd1234",
+
+  "name": "OpenWrt Homemain on KVM",
+
+  "arg_hostname": "rt-homemain-kvm1", // the hostname of the device
+  "arg_local_addr": "192.168.13.0/24", // the ip blocks for LAN
+
+  "arg_interface_config": { // the openwrt interface config
+    // name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]],
+    "office":   [  2010, "192.168.101.0/24", "Office", "pw4offic", ["wan"]],
+    "game":     [  2020, "192.168.102.0/24", "Game",   "pw4game1", ["wan"]],
+    "iotapp":   [  2030, "192.168.103.0/24", "IoT",    "pw4iot#!", []],
+    "surve":    [  2040, "192.168.104.0/24", "", "", []],
+    "guest":    [  2050, "192.168.105.0/24", "Guest",  "myGuest!", ["wan"]],
+  },
+
+  "external_tftp": "192.168.101.21", // the IP of the external TFTP server
+  "arg_app_zone": [
+    {
+      // some zones can access file server on zone office
+      // ports:
+      // 22/tcp   open  ssh
+      // 80/tcp   open  http
+      // 111/tcp  open  rpcbind
+      // 139/tcp  open  netbios-ssn
+      // 445/tcp  open  microsoft-ds
+      // 2049/tcp open  nfs
+      // 9091/tcp open  torrent web
+      "name": "Samba server 1",
+      "prefix": "fileserver_",
+      "zone_server": "office",
+      "ip": "192.168.101.22",
+      "zones_from": ["office", "game", "guest"],
+      // a blank sep ports list
+      "dest_port": "22 69 80 443 111 137 138 139 445 9091 4711 59000-59499",
+    },
+    {
+      // some zones can access printer on zone noinet
+      // ports:
+      //  515 -- LPD
+      // 9100 -- raw
+      // 3702 -- WSD Multicast Discovery
+      //   80 -- HTTP
+      //  161 -- SNMP
+      "name": "Printer server 1",
+      "prefix": "printserver_",
+      "zone_server": "office",
+      "ip": "192.168.101.23",
+      "zones_from": ["office", "game", "guest"],
+      // a blank sep ports list
+      "dest_port": "515 631 9100 3702",
+    }
+  ],
+  "extra_packets": [
+    "luci-ssl", "uhttpd", "ip-full", "ip-bridge", "gawk", // HTTPS and base
+    "bash",
+    "diffutils",
+    "block-mount",
+    "conntrack", "owipcalc", "etherwake", "uuidgen", // for bash-powerautosave
+    "tcpdump", "iperf3", "curl", // network tests
+  ],
+
+/** config for KVM
+ * +--------+--------+--------+--------+--------+--------+--------+
+ * | ------ |  WAN   |   1    |   2    |   3    |   4    |   5    |
+ * +--------+--------+--------+--------+--------+--------+--------+
+ * |  CPU   |  WAN   | LAN 1  | LAN 2  | LAN 3  | LAN 4  | LAN 5  |
+ * +--------+--------+--------+--------+--------+--------+--------+
+ * |  null  |  eth0  |  eth1  |  eth2  |  eth3  |  eth4  |  eth5  |
+ * +--------+--------+--------+--------+--------+--------+--------+
+ */
+  "driver": "openwrtuci",
+  "arg_is_gns3": true,
+  "arg_has_hw_switch": false,
+  "arg_port_map": { // the external port names to internal switch port num
+    // name: [ switch_port, device, ]
+    "CPU": [ null, null ],
+    "WAN": [ "eth0", "eth0" ],
+      "1": [ "eth1", "eth1" ],
+      "2": [ "eth2", "eth2" ],
+      "3": [ "eth3", "eth3" ],
+      "4": [ "eth4", "eth4" ],
+      "5": [ "eth5", "eth5" ],
+      "6": [ "eth6", "eth6" ],
+  },
+  "arg_port_vlan": { // the external port names to VLAN
+    // name: VLAN // VLAN 0: tagged, 1-4095 untagged, -1 off
+    "CPU":  0, // CPU (eth1) for LAN
+    "WAN":  2, // the physical port for WAN
+      "1":  1, // 80, // the physical port for LAN1
+      "2":  0, // the physical port for LAN2
+      "3": 2020, // the physical port for LAN3
+
+      "4":  1, // the physical port for LAN4
+      "5": 2020, // the physical port for LAN4
+      "6":  0, // the physical port for LAN4
+  },
+}
+
