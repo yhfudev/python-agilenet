@@ -43,11 +43,28 @@ def parse_version_line(str_output):
     L.debug("search[0]= {0}".format(search1.group(0)))
     return re.split(r':', search1.group(0))[1].strip()
 
-def parse_model_line(str_output):
+# show system
+def parse_hostname_line(str_output):
     search1 = re.search('\n.*System Name(.*)\s', str_output)
     L.debug("search = {0}".format(search1))
     L.debug("search[0]= {0}".format(search1.group(0)))
     return re.split(r':', search1.group(0))[1].strip()
+
+# show dhcp client vendor-specific
+def parse_model_line2(str_output):
+    search1 = re.search('Vendor Class Id (.*)\s', str_output)
+    L.debug("search = {0}".format(search1))
+    L.debug("search[0]= {0}".format(search1.group(0)))
+    str1 = re.split(r'=', search1.group(0))[1].strip()
+    return str1.replace(' dslforum.org', '')
+
+# show modules
+def parse_model_line3(str_output):
+    search1 = re.search('.*Chassis(.*)\s', str_output)
+    L.debug("search = {0}".format(search1))
+    L.debug("search[0]= {0}".format(search1.group(0)))
+    str1 = re.split(r':', search1.group(0))[1].strip()
+    return str1.replace('Serial Number', '').strip()
 
 def parse_ports(str_output):
     ret_vlan = []
@@ -128,36 +145,43 @@ class ArubaSwitch(Switch):
         #self.pexp.sendcontrol('c')
         while True:
             L.debug("enter to active prompt ...")
-            self.pexp.sendline("\r\n\r\n")
+            self.pexp.sendline("\r\n\r\n\r\n\r\n\r\n\r\n")
             #self.pexp.sendline('\r\nsh run | i ostname\r\n')
-            responses = ["Please answer 'yes' or 'no'","\[yes/no\]:","\[confirm\]","Press RETURN to get started.", ">", "#", pexpect.EOF, pexpect.TIMEOUT]
+            responses = [
+                "Please answer 'yes' or 'no'",
+                "\[yes/no\]:",
+                "\[confirm\]",
+                "Press RETURN to get started.",
+                "Processing of Vendor Specific Configuration",
+                ">",
+                "#",
+                pexpect.EOF,
+                pexpect.TIMEOUT]
             ret = self.pexp.expect(responses, timeout=5)
+            #ret = self.pexp.expect(responses)
             #if ret < 6:
             #    ln_before = self.pexp.before.decode('UTF-8')
             #    ln_after = self.pexp.after.decode('UTF-8')
             #    L.info("enter_enable ln_before=" + str(ln_before))
             #    L.info("enter_enable ln_after=" + str(ln_after))
             #    L.info("got response: {0}".format(responses[ret]))
-            if ret == 0:
+            if ret < 2:
                 L.debug("send 'no' ...")
                 self.pexp.sendline("no\r\n")
-            elif ret == 1:
-                L.debug("send 'no' ...")
-                self.pexp.sendline("no\r\n")
-            elif ret == 2:
+            elif ret < 5:
                 self.pexp.sendline("\r\n")
-            elif ret == 3:
-                L.debug("i need a RETURN!!")
-                continue
-            elif ret == 4:
+            elif ret == 5:
                 L.debug("enter to enable ...")
                 self.pexp.sendline("\r\nenable\r\n\r\n")
-            elif ret == 5:
+            elif ret == 6:
                 L.debug("got a '#'")
                 break
+            elif responses[ret] == pexpect.TIMEOUT:
+                L.debug("got eof/timeout")
+                self.pexp.sendline("\r\n")
             else:
                 L.debug("got eof/timeout")
-                pass
+                self.pexp.sendline("\r\n")
             time.sleep(2)
 
         self.pexp.sendline("terminal width 512\r\n")
@@ -183,17 +207,23 @@ class ArubaSwitch(Switch):
         self.pexp.expect(["#"])
 
     def _wait_reboot(self):
-        exp_list = ["\(y/n\)","\(yes/no\)","\[yes/no\]", "\[confirm\]", "Rebooting the System", "Initialization done", "Waiting for Speed Sense"]
+        exp_list = [
+            "\(y/n\)","\(yes/no\)","\[yes/no\]", "\[confirm\]",
+            "Rebooting the System", "Initialization done", "Waiting for Speed Sense", "Press any key to continue",
+            pexpect.EOF, pexpect.TIMEOUT]
         while True:
-            ret = self.pexp.expect(exp_list)
+            ret = self.pexp.expect(exp_list, timeout=15)
             if ret < 3:
                 L.info("send 'y' for '{0}' ...".format(exp_list[ret]))
                 self.pexp.sendline("y")
-            elif ret < 6:
-                L.info("waiting for console ...")
-                self.pexp.sendline()
+            elif ret < 7:
+                L.info("get expect messages ...")
+                self.pexp.sendline("\r\n")
+            elif exp_list[ret] == pexpect.TIMEOUT:
+                L.info("timeout, waiting for console ...")
+                self.pexp.sendline("\r\n")
             else:
-                L.info("time to enter console ...")
+                L.info("it's time to enter console ...")
                 break
         self.pexp.sendline("\r\n\r\n\r\n")
         self._enter_enable()
@@ -207,20 +237,39 @@ class ArubaSwitch(Switch):
 
         L.info("reboot() DONE")
 
+    def get_board(self):
+        self._enter_enable()
+        L.info("get_model_name() get version")
+        self._esc_console()
+
+        self.pexp.sendline('show modules')
+        self._nor_console()
+
+        ln_before = self.pexp.before.decode('UTF-8')
+        ln_after = self.pexp.after.decode('UTF-8')
+
+        L.debug("model ln_before=" + str(ln_before))
+        L.debug("model ln_after=" + str(ln_after))
+
+        self._end_console()
+        return parse_model_line3(ln_before)
+
     def get_model_name(self):
         self._enter_enable()
         L.info("get_model_name() get version")
-        self.pexp.sendline('show system\r\n')
-        L.debug("wait 1 Status and Counters")
-        self.pexp.expect('Status and Counters')
-        L.debug("wait 2 System Contact")
-        self.pexp.expect('System Contact')
+        self._esc_console()
+
+        self.pexp.sendline('\r\nshow dhcp client vendor-specific\r\n')
+        self._nor_console()
+
         ln_before = self.pexp.before.decode('UTF-8')
         ln_after = self.pexp.after.decode('UTF-8')
+
         L.debug("model ln_before=" + str(ln_before))
         L.debug("model ln_after=" + str(ln_after))
-        L.info("parse model")
-        return parse_model_line(ln_before)
+
+        self._end_console()
+        return parse_model_line2(ln_before)
 
     def get_version(self):
         self._enter_enable()
@@ -231,8 +280,8 @@ class ArubaSwitch(Switch):
         self.pexp.expect('Active Boot ROM')
         ln_before = self.pexp.before.decode('UTF-8')
         ln_after = self.pexp.after.decode('UTF-8')
-        L.debug("version ln_before=" + str(ln_before))
-        L.debug("version ln_after=" + str(ln_after))
+        # L.info("version ln_before=" + str(ln_before))
+        # L.debug("version ln_after=" + str(ln_after))
         return parse_version_line(ln_before)
 
     def show_info(self):
@@ -241,6 +290,7 @@ class ArubaSwitch(Switch):
         port_list = self.get_ports()
         L.info("get port_list: {0}".format(port_list))
         #self.pexp.sendline('show tech\r\n')
+        # show tech buffers
 
     def get_version_num(self):
         ver = self.get_version()
@@ -250,6 +300,12 @@ class ArubaSwitch(Switch):
     def get_hostname(self):
         self._enter_enable()
         L.info("get hostname")
+
+        # self.pexp.sendline('show system\r\n')
+        # self.pexp.expect('Status and Counters')
+        # self.pexp.expect('System Contact')
+        # parse_hostname_line(ln_before)
+
         self.pexp.sendline('sh run | i ostname\r\n')
         self.pexp.expect('hostname .*[\r\n]+')
         #ln_before = self.pexp.before.decode('UTF-8')
@@ -286,8 +342,8 @@ class ArubaSwitch(Switch):
         self.pexp.expect("#")
         ln_before = self.pexp.before.decode('UTF-8')
         ln_after = self.pexp.after.decode('UTF-8')
-        L.debug("vlan-switch ln_before=" + str(ln_before))
-        L.debug("vlan-switch ln_after=" + str(ln_after))
+        # L.debug("vlan-switch ln_before=" + str(ln_before))
+        # L.debug("vlan-switch ln_after=" + str(ln_after))
         return parse_ports(ln_before)
 
     # get a list of vlan
@@ -305,8 +361,8 @@ class ArubaSwitch(Switch):
 
         ln_before = self.pexp.before.decode('UTF-8')
         ln_after = self.pexp.after.decode('UTF-8')
-        L.debug("vlan-switch ln_before=" + str(ln_before))
-        L.debug("vlan-switch ln_after=" + str(ln_after))
+        # L.debug("vlan-switch ln_before=" + str(ln_before))
+        # L.debug("vlan-switch ln_after=" + str(ln_after))
         return parse_vlans(ln_before)
 
     # set current time to device
@@ -333,10 +389,7 @@ class ArubaSwitch(Switch):
         L.info("clock set DONE")
         return True
 
-    def get_clock(self):
-        self._enter_enable()
-        L.debug("get_clock ...")
-
+    def _esc_console(self):
         self.pexp.sendline('config')
         self.pexp.expect("\(config\)#")
 
@@ -344,10 +397,26 @@ class ArubaSwitch(Switch):
         self.pexp.sendline('console local-terminal none'); self.pexp.expect("\(config\)#")
 
         from switchdevice import pexpect_clean_buffer; pexpect_clean_buffer(self.pexp)
+        pass
+
+    def _nor_console(self):
+        self.pexp.sendline('console local-terminal ansi'); self.pexp.expect(["tty=ansi", "Invalid input: console"], timeout=2)
+        pass
+
+    def _end_console(self):
+        self.pexp.sendline('console local-terminal vt100'); self.pexp.expect("\(config\)#")
+        self.pexp.sendline('exit')
+        pass
+
+    def get_clock(self):
+        self._enter_enable()
+        L.debug("get_clock ...")
+
+        self._esc_console()
         #L.debug("show time ...")
 
         self.pexp.sendline('show time\r\n')
-        self.pexp.sendline('console local-terminal ansi'); self.pexp.expect("tty=ansi")
+        self._nor_console()
 
         ln_before = self.pexp.before.decode('UTF-8')
         ln_after = self.pexp.after.decode('UTF-8')
@@ -355,8 +424,7 @@ class ArubaSwitch(Switch):
         #L.debug("get_clock ln_before="); hexdump.hexdump(bytes(ln_before, 'utf-8'))
         #L.debug("get_clock ln_after="); hexdump.hexdump(bytes(ln_after, 'utf-8'))
 
-        self.pexp.sendline('console local-terminal vt100'); self.pexp.expect("\(config\)#")
-        self.pexp.sendline('exit')
+        self._end_console()
         return parse_clock_arubacli(ln_before)
 
     def reset_config(self, port_map):
@@ -498,9 +566,27 @@ if __name__ == '__main__':
         def tearDown(self):
             pass
 
-        def test_parse_model_line(self):
-            self.assertEqual('HP-2920-24G-PoEP', parse_model_line("""HP-2920-24G-PoEP# show system | i System Name
+        def test_parse_hostname(self):
+            self.assertEqual('HP-2920-24G-PoEP', parse_hostname_line("""HP-2920-24G-PoEP# show system | i System Name
   System Name        : HP-2920-24G-PoEP           """))
+
+        def test_parse_model_line2(self):
+            self.assertEqual('HP J9727A 2920-24G-PoE+ Switch', parse_model_line2("""#show dhcp client vendor-specific
+Vendor Class Id = HP J9727A 2920-24G-PoE+ Switch dslforum.org
+Processing of Vendor Specific Configuration is enabled"""))
+
+
+        def test_parse_model_line3(self):
+            self.assertEqual('2920-24G-PoE+  J9727A', parse_model_line3("""#show modules
+
+ Status and Counters - Module Information
+
+  Chassis: 2920-24G-PoE+  J9727A         Serial Number:   SG35FLX0QV
+
+
+  Slot  Module Description                         Serial Number    Status    
+  ----- ------------------------------------------ ---------------- ----------
+"""))
 
         def test_parse_version_line(self):
             self.assertEqual('WB.16.03', parse_version_line('Boot ROM Version:    WB.16.03'))
