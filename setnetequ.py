@@ -106,8 +106,8 @@ class PexpectWrapper():
         self._fp.flush()
         return self._pexp.sendline(a)
 
-    def expect(self, a):
-        return self._pexp.expect(a)
+    def expect(self, a, timeout=None):
+        return self._pexp.expect(a,timeout=timeout)
 
     def isalive(self):
         return self._pexp.isalive()
@@ -126,6 +126,9 @@ class PexpectWrapper():
     def get_after(self):
         return self._pexp.after
     after = property(get_after, set_after)
+
+    def read_nonblocking(self, a, timeout=None):
+        return self._pexp.read_nonblocking(a,timeout=timeout)
 
 # example config_connect
 #config_connect_1 = {
@@ -261,10 +264,12 @@ class ConfigDevice():
         if 'arg_port_vlan' in config_layout:
             port_vlan = config_layout['arg_port_vlan']
             [port_list, vlan_list] = port_vlan_to_lists(port_vlan)
-
-        else:
+        elif ('arg_port_list' in config_layout) and ('arg_vlan_list' in config_layout):
             vlan_list = config_layout['arg_vlan_list']
-            port_map = config_layout['arg_port_map']
+            port_list = config_layout['arg_port_list']
+        else:
+            L.error('not found config of port map')
+            return False
 
         if not self.device.set_vlans(config_layout['arg_port_map'], port_list, vlan_list, vlan_set_homemain, interface_config = interface_config_homemain):
             return False
@@ -379,12 +384,31 @@ class ConfigOpenwrtHomemain(ConfigOpenwrt):
         L.info("ConfigOpenwrtHomemain::_set_layout done")
         return True
 
+
+def factory_config_device(config_device):
+    device = None
+    if config_device['driver'] == 'ciscoios':
+        L.debug('return CiscoSwitch')
+        device = ConfigDevice(config_device, config_device)
+    elif config_device['driver'] == 'openwrtuci':
+        L.debug('return OpenwrtSwitch')
+        device = ConfigOpenwrtHomemain(config_device, config_device)
+    elif config_device['driver'] == 'dellpc':
+        L.debug('return DellSwitch')
+        device = ConfigDevice(config_device, config_device)
+    elif config_device['driver'] == 'arubacli':
+        L.debug('return ArubaSwitch')
+        device = ConfigDevice(config_device, config_device)
+
+    return device
+
+
 def setup_network_equipment(configs, reset=True, command="layout"):
 
     #import json
     #L.debug("use config:\n" + json.dumps(configs, indent=4))
 
-    rt1 = ConfigOpenwrtHomemain(configs, configs)
+    rt1 = factory_config_device(configs)
 
     rt1.show_info()
     if command == "info":
