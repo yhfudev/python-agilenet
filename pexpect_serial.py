@@ -31,6 +31,7 @@ __all__ = ['SerialSpawn']
 class SerialSpawn(spawn):
     """Extends pexpect.spawn to support serial connections created with
     pyserial."""
+    ptyproc = { 'flag_eof': None }
 
     def __init__(self, ser, args=None, **kwargs):
         """This takes a serial of pyserial as input. Please make sure the serial is open
