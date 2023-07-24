@@ -247,9 +247,8 @@ class ArubaSwitch(Switch):
 
         ln_before = self.pexp.before.decode('UTF-8')
         ln_after = self.pexp.after.decode('UTF-8')
-
-        L.debug("model ln_before=" + str(ln_before))
-        L.debug("model ln_after=" + str(ln_after))
+        # L.debug("model ln_before=" + str(ln_before))
+        # L.debug("model ln_after=" + str(ln_after))
 
         self._end_console()
         return parse_model_line3(ln_before)
@@ -264,9 +263,8 @@ class ArubaSwitch(Switch):
 
         ln_before = self.pexp.before.decode('UTF-8')
         ln_after = self.pexp.after.decode('UTF-8')
-
-        L.debug("model ln_before=" + str(ln_before))
-        L.debug("model ln_after=" + str(ln_after))
+        # L.debug("model ln_before=" + str(ln_before))
+        # L.debug("model ln_after=" + str(ln_after))
 
         self._end_console()
         return parse_model_line2(ln_before)
@@ -390,6 +388,7 @@ class ArubaSwitch(Switch):
         return True
 
     def _esc_console(self):
+        self.pexp.sendline('\r\nend\r\n')
         self.pexp.sendline('config')
         self.pexp.expect("\(config\)#")
 
