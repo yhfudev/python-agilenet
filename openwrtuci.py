@@ -19,7 +19,7 @@ import time
 import re
 import pexpect
 
-from switchdevice import Switch, port_vlan_to_lists
+from switchdevice import Switch, port_vlan_to_lists, pexpect_clean_buffer
 from parseclock import parse_clock_openwrt
 from configutil import get_network_addr, interfaces_has_subnet_ips
 
@@ -186,7 +186,7 @@ set network.@device[-1].type='bridge'
         if ifname:
             cmd_intf += f"add_list network.@device[-1].ports={ifname}\n"
         else:
-            L.warn("error in ifname: {ifname}")
+            L.warning("error in ifname: {ifname}")
     return cmd_intf
 
 # trunk_bridge_device_name: the br_trunk bridge name, it can be either 'br-lan' if the LAN connected to a physical ethernet port, or 'br_trunk' for the sub-network VLANs only.
@@ -328,7 +328,7 @@ set network.{0}.ip6assign='60'
 
         ipnet = get_network_addr(ipaddr_lan)
         if ipnet == None:
-            L.warn("2 unable to get network address for '{0}'".format(ipaddr_lan))
+            L.warning("2 unable to get network address for '{0}'".format(ipaddr_lan))
         else:
             cmd_intf += getconf_set_network(ipnet, i)
 
@@ -631,6 +631,8 @@ set wireless.@wifi-iface[-2].ft_over_ds='0'
 set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
 """.format(0, 'lan', ssid_lan, key_lan)
 
+        ret_conf_list.append(cmd_intf); cmd_intf = ""
+
         # if there's no enough port for LAN, or is for a edge wifi
         if (len(port_map) < 3) or (not has_subnet_ips):
             cmd_intf += """
@@ -707,6 +709,9 @@ set dhcp.{0}.ra='server'
                 #cmd_intf += f"add_list dhcp.{i}.dhcp_option='3'\n"
                 # To disable setting the DNS server
                 # option dhcp_option '6'
+
+        ret_conf_list.append(cmd_intf); cmd_intf = ""
+
         if len(interface_config[i][4]):
             cmd_intf += """
 add firewall zone
@@ -747,6 +752,8 @@ set wireless.wifinet{0}{1}.ft_over_ds='0'
 set wireless.wifinet{0}{1}.ft_psk_generate_local='1'
 set wireless.wifinet{0}{1}.disabled='0'
 """.format(w, i, interface_config[i][2], interface_config[i][3])
+                ret_conf_list.append(cmd_intf); cmd_intf = ""
+
         # TODO: isolate each device in the guest/iot network
         # Client Isolation is a security feature that prevents wireless clients on that network from interacting with each other, which can be enabled on networks in AP mode.
         # config 'wifi-iface'
@@ -764,7 +771,7 @@ set network.wan6.proto='dhcpv6'
     # set lan IP
     ipnet = get_network_addr(ipaddr_lan)
     if ipnet == None:
-        L.warn("1 unable to get network address for '{0}'".format(ipaddr_lan))
+        L.warning("1 unable to get network address for '{0}'".format(ipaddr_lan))
     else:
         cmd_intf += "\n"
         cmd_intf += getconf_set_network(ipnet, 'lan')
@@ -783,6 +790,7 @@ delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
 """
+    ret_conf_list.append(cmd_intf); cmd_intf = ""
 
     # set WAN6 IPv6 prefix length
     # config interface 'wan6'
@@ -804,6 +812,7 @@ set network.lan.device='br-lan.1'
 set network.lan.device='br-lan'
 """
         if not has_subnet_ips:
+            # L.debug(f"caller set has_subnet_ips={has_subnet_ips}; so delete wan/wan6")
             # edge router
             # remove wan interfaces
             cmd_intf += """
@@ -875,6 +884,7 @@ def getconf_vlans_swconfig(port_map, port_list, vlan_list, vlan_set0, switch_nam
     vlan_num = 1
     for vlanid in sorted(vlan_set):
         str_ports = ""
+        # assert(len(vlan_list) == len(port_list), f"the length of the vlan_list and port_list shoudl equal")
         for i in range(0,len(vlan_list)):
 
             vlan1 = vlan_list[i]
@@ -1107,7 +1117,7 @@ class OpenwrtSwitch(Switch):
         L.info("reboot -f ...")
         self.pexp.sendline('sync')
         self.pexp.sendline('reboot -f')
-        self.pexp.expect('reboot: Restarting system')
+        self.pexp.expect([ 'reboot: Restarting system', 'U-Boot' ])
         L.info("reboot starting ...")
         self.pexp.expect('Please press Enter to activate this console.')
         L.info("enter to console ...")
@@ -1318,6 +1328,7 @@ class OpenwrtSwitch(Switch):
 
         self.pexp.sendline("uci commit system")
         self.pexp.sendline("/etc/init.d/system reload")
+        time.sleep(1)
 
         return True
 
@@ -1338,6 +1349,8 @@ class OpenwrtSwitch(Switch):
     def setup_br_trunk(self, port_list = [], vlan_list = []):
         if len(port_list) != len(vlan_list):
             L.error("parameter list not equal!")
+            L.error(f"port_list len={len(port_list)}, {port_list}")
+            L.error(f"vlan_list len={len(vlan_list)}, {vlan_list}")
             return False
         # if set, ignore
         if self.br_trunk: return True
@@ -1405,15 +1418,16 @@ set network.@device[-1].type='bridge'
 
         swconf = self.get_swconfig()
         if swconf:
-            # delete old vlan settings
-            L.info("reset 'network.@switch_vlan' ...")
-            self._remove_section_filter("network", "switch_vlan")
-            support_vid = self.swconfig_support_vid()
-            support_vlan4k = self.swconfig_support_vlan4k()
+            if self.has_hw_switch:
+                # delete old vlan settings
+                L.info("reset 'network.@switch_vlan' ...")
+                self._remove_section_filter("network", "switch_vlan")
+                support_vid = self.swconfig_support_vid()
+                support_vlan4k = self.swconfig_support_vlan4k()
 
-            switch_name = swconf[0]
-            str_conf = getconf_vlans_swconfig(port_map, port_list, vlan_list, vlan_set, swconf[0], support_vid=support_vid, support_vlan4k=support_vlan4k)
-            self.pexp.sendline(str_conf)
+                switch_name = swconf[0]
+                str_conf = getconf_vlans_swconfig(port_map, port_list, vlan_list, vlan_set, swconf[0], support_vid=support_vid, support_vlan4k=support_vlan4k)
+                self.pexp.sendline(str_conf)
 
         elif self._is_dsa():
             # TODO: get the device name 'br-lan'
@@ -1442,6 +1456,7 @@ set network.@device[-1].type='bridge'
         tz = list(time.tzname)
         self.pexp.sendline("uci set system.@system[0].timezone='{0}'".format(tz[0]))
         self.pexp.sendline("uci commit system")
+        time.sleep(1)
         return True
 
     # set current time to device
@@ -1521,10 +1536,10 @@ commit network
             L.info("_wait_connected() ping ...")
             url_test = "openwrt.org"
             self.pexp.sendline('ping -c 2 {0}'.format(url_test))
-            expect_list = ['2 packets transmitted, 2 packets received,', 'ping: sendto: Permission denied', "ping: bad address '{0}'".format(url_test), 'ping: sendto: Network unreachable']
+            expect_list = ['2 packets transmitted, 2 packets received,', '2 packets transmitted, 1 packets received', 'ping: sendto: Permission denied', "ping: bad address '{0}'".format(url_test), 'ping: sendto: Network unreachable']
             ret = self.pexp.expect(expect_list)
             L.debug(f"ping return [{ret}]={expect_list[ret]}")
-            if ret == 0:
+            if ret < 2:
                 return True
             if tm_start + delta <= datetime.now():
                 L.error("can not access Internet")
@@ -1559,7 +1574,7 @@ commit network
             return False
 
         L.info("opkg update")
-        count = 5
+        count = 60
         while count > 0:
             self.pexp.sendline('opkg update')
             expect_list = ['Updated list of available packages in /var/opkg-lists/openwrt_telephony', 'Failed to download the package list from', 'available on filesystem /overlay,', 'Cannot install package']
@@ -1568,11 +1583,12 @@ commit network
                 L.error("unable to update, no connection? ret={}, msg={}".format(ret, expect_list[ret]))
                 L.debug("read before=" + str(self.pexp.before))
                 L.debug("read after=" + str(self.pexp.after))
+                pexpect_clean_buffer(self.pexp)
             else:
                 break
             count -= 1
             L.debug("count={}".format(count))
-            time.sleep(2)
+            time.sleep(5)
         if count < 1:
             L.error("Error in update")
             return False
@@ -1581,24 +1597,29 @@ commit network
         #self.pexp.sendline('opkg list_installed > /tmp/opkg-installed.txt')
         #self.pexp.sendline('cat /tmp/opkg-installed.txt | gawk '{print $1}' | xargs -n 1 opkg upgrade')
         for i in packages:
-            L.info("opkg install {0} ...".format(i))
+            pkg = i.strip()
+            L.info("opkg install {0} ...".format(pkg))
 
-            count = 5
+            count = 60
             while count > 0:
-                self.pexp.sendline('opkg install {0}'.format(i))
-                expect_list = ['Configuring {0}.'.format(i), 'installed in root is up to date.', 'Cannot install package', 'Failed to download', 'Unknown package']
+                pexpect_clean_buffer(self.pexp)
+                self.pexp.sendline('opkg install {0}'.format(pkg))
+                expect_list = ['Configuring {0}.'.format(pkg), 'installed in root is up to date.', 'Cannot install package', 'Unknown package', 'Failed to download']
                 ret = self.pexp.expect(expect_list)
-                if ret > 1:
-                    L.error("unable to install '{}', no connection? ret={}, msg={}".format(i, ret, expect_list[ret]))
+                if ret < 1:
+                    break
+                elif ret < 4:
+                    L.warning(f"Warning: pkg={pkg}: {expect_list[ret]}")
+                    break
+                else:
+                    L.error("unable to install '{}', no connection? ret={}, msg={}".format(pkg, ret, expect_list[ret]))
                     L.debug("read before=" + str(self.pexp.before))
                     L.debug("read after=" + str(self.pexp.after))
-                else:
-                    break
                 count -= 1
                 L.debug("count={}".format(count))
-                time.sleep(2)
+                time.sleep(5)
             if count < 1:
-                L.error("Error in install package {}".format(i))
+                L.error("Error in install package {}".format(pkg))
                 return False
         return self.change_to_https()
 
@@ -1725,7 +1746,7 @@ head -n -0 /etc/resolv.* /tmp/resolv.*
                 cmd_intf = getconf_default_vlan_swconfig(port_map, swconf[0], support_vlan4k=support_vlan4k)
                 self.pexp.sendline(cmd_intf)
             else:
-                L.warn("not found swconfig! ignore default VLAN")
+                L.warning("not found swconfig! ignore default VLAN")
 
         L.info("setup default network ...")
         dev_lan = None
@@ -1750,7 +1771,7 @@ head -n -0 /etc/resolv.* /tmp/resolv.*
         if not interface_config:
             L.error("not specify the interface config")
             return False
-        self.setup_br_trunk(interface_config)
+        #self.setup_br_trunk(port_list, vlan_list)
 
         hostname = self.get_hostname()
         prompt = [ "root@{0}:/#".format(hostname) ]
@@ -1786,7 +1807,7 @@ head -n -0 /etc/resolv.* /tmp/resolv.*
             #L.debug("wifi ln_after=" + str(ln_after))
             num_wifi = get_hw_wifi_number(ln_before)
         else:
-            L.warn("cant find iw dev {0}: '{1}'".format(ret, iw_exp[ret]))
+            L.warning("cant find iw dev {0}: '{1}'".format(ret, iw_exp[ret]))
 
         if num_wifi > 0:
             L.info("WiFi devices detected")
@@ -3085,11 +3106,19 @@ Found: switch0 - mdio.0
 """
             self.assertEqual(parse_swconfig_line(input), ['switch0', 'mdio.0'])
 
+
+            input="""swconfig list
+Found: switch0 - eth0
+"""
+            self.assertEqual(parse_swconfig_line(input), ['switch0', 'eth0'])
+
+
             input="""get_swconfig_begin
 /bin/ash: swconfig: not found
 get_swconfig_end
 """
             self.assertEqual(parse_swconfig_line(input), None)
+
 
         def test_parse_swconfig_support_vid_line_asus(self):
 

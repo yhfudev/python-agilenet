@@ -76,6 +76,17 @@ def factory_device(config_device):
         else:
             device.has_hw_switch = False
 
+        # check the port_map, make sure that if the config["arg_has_hw_switch"]==True, the config["arg_port_map"]["CPU"] should not be [None,None]
+        if device.has_hw_switch:
+            if not config_device['arg_port_map']['CPU']:
+                L.error(f"The hardware switch is configured, but there's no 'CPU' entry in the port map.")
+                L.warning(f"The code will automatically revert to the configuration of no hardware switch.")
+                device.has_hw_switch = False
+            if not config_device['arg_port_map']['CPU'][0]:
+                L.error(f"The hardware switch is configured, but the port map for 'CPU' is not set up to a specific switch port.")
+                L.warning(f"The code will automatically revert to the configuration of no hardware switch.")
+                device.has_hw_switch = False
+
         if ('arg_is_gns3' in config_device) and config_device['arg_is_gns3']:
             device.is_gns3 = True
         else:
@@ -343,6 +354,7 @@ class ConfigOpenwrt(ConfigDevice):
         if not self.device.has_hw_switch:
             ifname_gen = VlanPortGenerator(port_map, port_list, vlan_list)
         L.debug(f"ConfigOpenwrt::_set_layout ifname_gen={ifname_gen}")
+        self.device.setup_br_trunk(port_list, vlan_list)
         if not self.device.set_interfaces(ipaddr_lan=config_layout['arg_local_addr'], interface_config=config_layout['arg_interface_config'], port_map=port_map, ifname_gen=ifname_gen):
             L.error("ConfigOpenwrt::_set_layout error in set_interfaces 3")
             return False
@@ -387,17 +399,10 @@ class ConfigOpenwrtHomemain(ConfigOpenwrt):
 
 def factory_config_device(config_device):
     device = None
-    if config_device['driver'] == 'ciscoios':
-        L.debug('return CiscoSwitch')
-        device = ConfigDevice(config_device, config_device)
-    elif config_device['driver'] == 'openwrtuci':
-        L.debug('return OpenwrtSwitch')
+    if config_device['driver'] == 'openwrtuci':
+        L.debug('return ConfigOpenwrtHomemain')
         device = ConfigOpenwrtHomemain(config_device, config_device)
-    elif config_device['driver'] == 'dellpc':
-        L.debug('return DellSwitch')
-        device = ConfigDevice(config_device, config_device)
-    elif config_device['driver'] == 'arubacli':
-        L.debug('return ArubaSwitch')
+    else:
         device = ConfigDevice(config_device, config_device)
 
     return device

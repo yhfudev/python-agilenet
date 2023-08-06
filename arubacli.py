@@ -51,7 +51,7 @@ def parse_hostname_line(str_output):
     return re.split(r':', search1.group(0))[1].strip()
 
 # show dhcp client vendor-specific
-def parse_model_line2(str_output):
+def parse_model_line(str_output):
     search1 = re.search('Vendor Class Id (.*)\s', str_output)
     L.debug("search = {0}".format(search1))
     L.debug("search[0]= {0}".format(search1.group(0)))
@@ -59,7 +59,7 @@ def parse_model_line2(str_output):
     return str1.replace(' dslforum.org', '')
 
 # show modules
-def parse_model_line3(str_output):
+def parse_chassis_line(str_output):
     search1 = re.search('.*Chassis(.*)\s', str_output)
     L.debug("search = {0}".format(search1))
     L.debug("search[0]= {0}".format(search1.group(0)))
@@ -239,9 +239,9 @@ class ArubaSwitch(Switch):
 
     def get_board(self):
         self._enter_enable()
-        L.info("get_model_name() get version")
         self._esc_console()
 
+        L.info("get_board() show modules")
         self.pexp.sendline('show modules')
         self._nor_console()
 
@@ -251,13 +251,13 @@ class ArubaSwitch(Switch):
         # L.debug("model ln_after=" + str(ln_after))
 
         self._end_console()
-        return parse_model_line3(ln_before)
+        return parse_chassis_line(ln_before)
 
     def get_model_name(self):
         self._enter_enable()
-        L.info("get_model_name() get version")
         self._esc_console()
 
+        L.info("get_model_name() show dhcp client vendor-specific")
         self.pexp.sendline('\r\nshow dhcp client vendor-specific\r\n')
         self._nor_console()
 
@@ -267,7 +267,7 @@ class ArubaSwitch(Switch):
         # L.debug("model ln_after=" + str(ln_after))
 
         self._end_console()
-        return parse_model_line2(ln_before)
+        return parse_model_line(ln_before)
 
     def get_version(self):
         self._enter_enable()
@@ -569,14 +569,14 @@ if __name__ == '__main__':
             self.assertEqual('HP-2920-24G-PoEP', parse_hostname_line("""HP-2920-24G-PoEP# show system | i System Name
   System Name        : HP-2920-24G-PoEP           """))
 
-        def test_parse_model_line2(self):
-            self.assertEqual('HP J9727A 2920-24G-PoE+ Switch', parse_model_line2("""#show dhcp client vendor-specific
+        def test_parse_model_line(self):
+            self.assertEqual('HP J9727A 2920-24G-PoE+ Switch', parse_model_line("""#show dhcp client vendor-specific
 Vendor Class Id = HP J9727A 2920-24G-PoE+ Switch dslforum.org
 Processing of Vendor Specific Configuration is enabled"""))
 
 
-        def test_parse_model_line3(self):
-            self.assertEqual('2920-24G-PoE+  J9727A', parse_model_line3("""#show modules
+        def test_parse_chassis_line(self):
+            self.assertEqual('2920-24G-PoE+  J9727A', parse_chassis_line("""#show modules
 
  Status and Counters - Module Information
 
