@@ -34,6 +34,20 @@ import logging
 L = logging.getLogger('switch')
 
 ################################################################################
+def version_to_value(str_ver):
+    major, minor, patch = [int(x, 10) for x in str_ver.split('.')]
+    return major * 1000 * 1000 + minor * 1000 + patch
+def compare_version(str1, str2):
+    val1 = version_to_value(str1)
+    val2 = version_to_value(str2)
+    ret = val1 - val2
+    if ret < 0:
+        return -1
+    if ret > 0:
+        return 1
+    return 0
+
+################################################################################
 def parse_model_line(str_model):
     search_item = re.search('get_model_begin[\s\n]+(.*)', str_model)
     #search_item = re.search('get_model_begin=(.*)', str_model)
@@ -1849,6 +1863,11 @@ head -n -0 /etc/resolv.* /tmp/resolv.*
             L.info("WiFi devices detected")
         else:
             L.info("WiFi devices not found")
+
+        # version = self.get_version()
+        # use_device = False
+        # if compare_version(version, "21.02.0") >= 0:
+        #     use_device = True
 
         # detect if the wan interface exist of a main router, if not then setup the wan
         create_wan = False
@@ -4105,5 +4124,10 @@ add_list network.@bridge-vlan[-1].ports='wan:t'
 
             self.assertEqual(port_list, ["1","2","3","4","WAN"])
             self.assertEqual(vlan_list, [1,80,20,0,2])
+
+        def test_version_compare(self):
+            self.assertEqual( 0, compare_version("0.0.0", "0.0.0"))
+            self.assertEqual( 1, compare_version("1.0.0", "0.0.0"))
+            self.assertEqual(-1, compare_version("1.0.0", "1.0.1"))
 
     unittest.main()
