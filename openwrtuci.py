@@ -1126,9 +1126,17 @@ class OpenwrtSwitch(Switch):
         L.info("got a shell")
         if wait_network:
             L.info("waiting for network link ready ...")
-            self.pexp.expect(['\) entered forwarding state', 'br-lan: link becomes ready', 'internet: link becomes ready', 'wan: link becomes ready'])
+            responses = [
+                '\) entered forwarding state',
+                'br-lan: link becomes ready',
+                'internet: link becomes ready',
+                'wan: link becomes ready',
+                pexpect.EOF,
+                pexpect.TIMEOUT
+                ]
+            self.pexp.expect(responses, timeout=60)
             L.info("brought the network interfaces up.")
-        time.sleep(5)
+        time.sleep(2)
 
     def _is_dsa(self):
         # if grep -sq DEVTYPE=dsa /sys/class/net/*/uevent; then echo "IsDSA"; else echo "NotDSA"; fi
