@@ -70,24 +70,28 @@ The tested boards include:
   - OpenWRT version 19: [Download VM 19.07.10](https://downloads.openwrt.org/releases/19.07.10/targets/x86/generic/openwrt-19.07.10-x86-generic-combined-ext4.img.gz)
   - OpenWRT version 21: (no DSA) [Download VM 21.02.7](https://downloads.openwrt.org/releases/21.02.7/targets/x86/generic/openwrt-21.02.7-x86-generic-generic-ext4-combined.img.gz)
   - OpenWRT version 22: (no DSA) [Download VM 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/x86/generic/openwrt-22.03.5-x86-generic-generic-ext4-combined.img.gz)
+  - OpenWRT version 23: (no DSA) [Download VM 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/x86/generic/openwrt-23.05.2-x86-generic-generic-ext4-combined.img.gz)
 
 
 - `ramips/rt3883`- Asus RT-N56U; CPU 500MHz, RAM 128MB, Flash 8MB:
   - OpenWRT version 19: [Download FW 19.07.10](https://archive.openwrt.org/releases/19.07.10/targets/ramips/rt3883/openwrt-19.07.10-ramips-rt3883-rt-n56u-squashfs-sysupgrade.bin)
   - OpenWRT version 21: (no DSA) [Download FW 21.02.7](https://downloads.openwrt.org/releases/21.02.7/targets/ramips/rt3883/openwrt-21.02.7-ramips-rt3883-asus_rt-n56u-squashfs-sysupgrade.bin)
   - OpenWRT version 22: (no DSA) [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ramips/rt3883/openwrt-22.03.5-ramips-rt3883-asus_rt-n56u-squashfs-sysupgrade.bin)
+  - OpenWRT version 23: (no DSA) [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/ramips/rt3883/openwrt-23.05.2-ramips-rt3883-asus_rt-n56u-squashfs-sysupgrade.bin)
 
 
 - `ath79`: TP-Link Archer C6 v2 (US) / A6 v2 (US/TW), CPU Atheros QCA9563 @775MHz, RAM 128MiB, Flash 16MiB
   - OpenWRT version 19: NOT supported
   - OpenWRT version 21: (no DSA) [Download FW 21.02.7](https://downloads.openwrt.org/releases/21.02.7/targets/ath79/generic/openwrt-21.02.7-ath79-generic-tplink_archer-c6-v2-us-squashfs-sysupgrade.bin),
-  - OpenWRT version 21: (no DSA) [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ath79/generic/openwrt-22.03.5-ath79-generic-tplink_archer-c6-v2-us-squashfs-sysupgrade.bin)
+  - OpenWRT version 22: (no DSA) [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ath79/generic/openwrt-22.03.5-ath79-generic-tplink_archer-c6-v2-us-squashfs-sysupgrade.bin)
+  - OpenWRT version 23: (no DSA) [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/ath79/generic/openwrt-23.05.2-ath79-generic-tplink_archer-c6-v2-us-squashfs-sysupgrade.bin)
 
 
 - `ar71xx`: TP-Link Archer C7 v2, Qualcomm Atheros QCA9558 @720 MHz, RAM 128 MB, Flash 16 MB; Max 8 WiFi APs/band
   - OpenWRT version 19: [Download FW 19.07.10](https://downloads.openwrt.org/releases/19.07.10/targets/ath79/generic/openwrt-19.07.10-ath79-generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin)
   - OpenWRT version 21: (no DSA) [Download FW 21.02.7](https://downloads.openwrt.org/releases/21.02.7/targets/ath79/generic/openwrt-21.02.7-ath79-generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin),
-  - OpenWRT version 21: (no DSA) [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ath79/generic/openwrt-22.03.5-ath79-generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin)
+  - OpenWRT version 22: (no DSA) [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ath79/generic/openwrt-22.03.5-ath79-generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin)
+  - OpenWRT version 23: (no DSA) [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/ath79/generic/openwrt-23.05.2-ath79-generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin)
 
 
 - `kirkwood`: Linksys EA4500, CPU 1.2 GHz, RAM 128MB, Flash 128MB
@@ -95,6 +99,7 @@ The tested boards include:
   - OpenWRT version 21 (with DSA): [Download FW 21.02.7](https://downloads.openwrt.org/releases/21.02.7/targets/kirkwood/generic/openwrt-21.02.7-kirkwood-linksys_ea4500-squashfs-sysupgrade.bin),
     - It is not possible to edit `bridge-vlan` for `br-lan`.
   - OpenWRT version 22 (with DSA): [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/kirkwood/generic/openwrt-22.03.5-kirkwood-linksys_ea4500-squashfs-sysupgrade.bin)
+  - OpenWRT version 23 (with DSA): [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/kirkwood/generic/openwrt-23.05.2-kirkwood-linksys_ea4500-squashfs-sysupgrade.bin)
   - Notes: It's not possible to upgrade from OpenWRT version 21.02.7 to 22.03.5 using the Luci interface. Instead, you'll need to use the command line for the upgrade:
 ```bash
 cd /tmp
@@ -107,6 +112,7 @@ sysupgrade -F -n factory.img
   - OpenWRT version 21 (with DSA): [Download FW 21.02.7](https://downloads.openwrt.org/releases/21.02.7/targets/ramips/mt7621/openwrt-21.02.7-ramips-mt7621-linksys_ea7500-v2-squashfs-sysupgrade.bin)
     - It is not possible to edit `bridge-vlan` for `br-lan` for the OpenWrt version 21.02.3.
   - OpenWRT version 22 (with DSA): [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ramips/mt7621/openwrt-22.03.5-ramips-mt7621-linksys_ea7500-v2-squashfs-sysupgrade.bin)
+  - OpenWRT version 23 (with DSA): [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/ramips/mt7621/openwrt-23.05.2-ramips-mt7621-linksys_ea7500-v2-squashfs-sysupgrade.bin)
   - Notes: If the router gets too hot, you can find solutions: [here](https://www.qualityology.com/tech/resolve-overheating-issues-on-linksys-ea6300-ea6350-ea6400-ea6700-or-similar-routers/)
 
 
@@ -115,18 +121,37 @@ It has a single Ethernet port that serves two use cases: when the device acts as
   - OpenWRT version 19: NOT supported
   - OpenWRT version 21: (with DSA) [Download FW 21.02.7](https://downloads.openwrt.org/releases/21.02.7/targets/ramips/mt7621/openwrt-21.02.7-ramips-mt7621-ubnt_unifi-6-lite-squashfs-sysupgrade.bin)
   - OpenWRT version 22: (with DSA) [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ramips/mt7621/openwrt-22.03.5-ramips-mt7621-ubnt_unifi-6-lite-squashfs-sysupgrade.bin)
+  - OpenWRT version 23: (with DSA) [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/ramips/mt7621/openwrt-23.05.2-ramips-mt7621-ubnt_unifi-6-lite-squashfs-sysupgrade.bin)
+
+
+- `ramips/mt7621`: ZyXEL NWA50AX, CPU Mediatek MT7621, RAM 256MB, Flash 128MB
+It has a single Ethernet port that serves two use cases: when the device acts as the main router, it can connect to the Internet; alternatively, when the device functions as an edge router to extend the network, it acts as a VLAN trunk bridge to the main router.
+  - OpenWRT version 19: NOT supported
+  - OpenWRT version 21: NOT supported
+  - OpenWRT version 22: (with DSA) [Download FW 22.03.5](https://downloads.openwrt.org/releases/22.03.5/targets/ramips/mt7621/openwrt-22.03.5-ramips-mt7621-zyxel_nwa50ax-squashfs-ramboot-factory.bin)
+  - OpenWRT version 23: (with DSA) [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/ramips/mt7621/openwrt-23.05.2-ramips-mt7621-zyxel_nwa50ax-squashfs-ramboot-factory.bin)
+
+
+- `mediatek/filogic`: GL.iNet Beryl AX (GL-MT3000), MT7981B, RAM 512MB, Flash 256MB,
+  - OpenWRT version 19: NOT supported
+  - OpenWRT version 21: NOT supported
+  - OpenWRT version 22: NOT supported
+  - OpenWRT version 23: (with DSA) [Download FW 23.05.2](https://downloads.openwrt.org/releases/23.05.2/targets/mediatek/filogic/openwrt-23.05.2-mediatek-filogic-glinet_gl-mt3000-squashfs-sysupgrade.bin)
+
 
 
 test matrix: (-- - not supported, Y - yes, N - not tested; X - test failed; DSA - test DSA)
-| board \ openwrt | OpenWRT 19.07.10 | OpenWRT 21.02.7 | OpenWRT 22.03.5 |
-|-----------------|------------------|-----------------|-----------------|
-x86: KVM | Y (1) | Y (1) | Y (1)
-ramips/rt3883: Asus RT-N56U | Y | Y | Y
-ath79: TP-Link Archer C6 v2 (US) / A6 v2 (US/TW) | -- | Y | Y
-ar71xx: TP-Link Archer C7 v2 | Y | Y | Y
-kirkwood: Linksys EA4500 | -- | Y, DSA (2) | Y, DSA
-ramips/mt7621: Linksys EA7500 V2 | -- | Y, DSA (2) | Y, DSA
-ramips/mt7621: Ubiquiti UniFi 6 Lite | -- | Y, DSA | Y, DSA
+| board \ openwrt | OpenWRT 19.07.10 | OpenWRT 21.02.7 | OpenWRT 22.03.5 | OpenWRT 23.05.2 |
+|-----------------|------------------|-----------------|-----------------|-----------------|
+x86: KVM | Y (1) | Y (1) | Y (1) | Y (1)
+ramips/rt3883: Asus RT-N56U | Y | Y | Y | Y
+ath79: TP-Link Archer C6 v2 (US) / A6 v2 (US/TW) | -- | Y | Y | Y
+ar71xx: TP-Link Archer C7 v2 | Y | Y | Y | Y
+kirkwood: Linksys EA4500 | -- | Y, DSA (2) | Y, DSA | Y, DSA
+ramips/mt7621: Linksys EA7500 V2 | -- | Y, DSA (2) | Y, DSA | Y, DSA
+ramips/mt7621: Ubiquiti UniFi 6 Lite | -- | Y,  DSA | Y, DSA | Y, DSA
+ramips/mt7621: ZyXEL NWA50AX | -- | -- | Y, DSA | Y, DSA
+mediatek/filogic: GL.iNet Beryl AX | -- | -- | -- | Y, DSA
 
 Note:
 If you try to use a sub-network managed by the edge router itself, instead of the main router, you will need to manually assign a bridge device to a LAN interface in the LUCI interface of the edge router. This step is necessary to enable internet connectivity for LAN clients connected to the edge router.
@@ -153,7 +178,8 @@ Note:
 
 The AgileNet utilizes a terminal console to set up the devices, either through a direct connection to the UART/RS-323 or a software bridged port. It is crucial to ensure an uninterrupted connection between the software and the device, even during device reboots.
 
-In the case of OpenWRT devices, connecting the WAN port to a network with internet access is essential. This requirement is necessary for the installation of some required packages, such as `luci-ssl`, during the setup process. The installation of these packages is critical and can only be carried out when there is an active internet connection.
+In the case of OpenWRT devices, connecting the WAN port to a network with internet access is essential if some required packages are not included in the flash image. This requirement is necessary for the installation of certain packages, such as `luci-ssl`, during the setup process. The installation of these packages is critical and can only be carried out when there is an active internet connection. Alternatively, you can also re-pack a customized ROM image by yourself, including all the necessary packages for your specific usage, and then flash it onto the device. This eliminates the need to connect to the internet for downloading packages during the device configuration using this tool.
+
 
 ### Initialize a Python environment
 
@@ -185,8 +211,13 @@ To grant the current user access to the `tty` group in order to access a USB UAR
 
 - Open a terminal or command prompt. Run the following command to add the current user to the `tty` group:
 ```bash
+# get the device info
+stat /dev/ttyUSB0
+
 #sudo usermod -a -G tty $(whoami)
 sudo usermod -a -G dialout $(whoami)
+
+grep -Hrn dialout /etc/group
 
 # re-login OR su - ${USER}
 id -nG
