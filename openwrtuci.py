@@ -2088,6 +2088,29 @@ EOF
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 
+set wireless.@wifi-iface[-1].disabled=0
+set wireless.@wifi-iface[-1].mode='ap'
+set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-1].disassoc_low_ack='0'
+set wireless.@wifi-iface[-1].wps_pushbutton='0'
+set wireless.@wifi-iface[-1].network='lan'
+set wireless.@wifi-iface[-1].ssid='OpenWrt'
+set wireless.@wifi-iface[-1].key='password'
+set wireless.@wifi-iface[-1].ieee80211r='1'
+set wireless.@wifi-iface[-1].ft_over_ds='0'
+set wireless.@wifi-iface[-1].ft_psk_generate_local='1'
+set wireless.@wifi-iface[-2].disabled=0
+set wireless.@wifi-iface[-2].mode='ap'
+set wireless.@wifi-iface[-2].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-2].disassoc_low_ack='0'
+set wireless.@wifi-iface[-2].wps_pushbutton='0'
+set wireless.@wifi-iface[-2].network='lan'
+set wireless.@wifi-iface[-2].ssid='OpenWrt'
+set wireless.@wifi-iface[-2].key='password'
+set wireless.@wifi-iface[-2].ieee80211r='1'
+set wireless.@wifi-iface[-2].ft_over_ds='0'
+set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
+""","""
 set wireless.@wifi-device[0].disabled=1
 set wireless.@wifi-device[1].disabled=1
 
@@ -2126,7 +2149,7 @@ delete network.wan.ifname
 delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
-
+""","""
 set network.wan6.reqprefix='48'
 
 set network.lan.device='br-lan.1'
@@ -2150,6 +2173,29 @@ set network.wan6.device='wan'
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 
+set wireless.@wifi-iface[-1].disabled=0
+set wireless.@wifi-iface[-1].mode='ap'
+set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-1].disassoc_low_ack='0'
+set wireless.@wifi-iface[-1].wps_pushbutton='0'
+set wireless.@wifi-iface[-1].network='lan'
+set wireless.@wifi-iface[-1].ssid='OpenWrt'
+set wireless.@wifi-iface[-1].key='password'
+set wireless.@wifi-iface[-1].ieee80211r='1'
+set wireless.@wifi-iface[-1].ft_over_ds='0'
+set wireless.@wifi-iface[-1].ft_psk_generate_local='1'
+set wireless.@wifi-iface[-2].disabled=0
+set wireless.@wifi-iface[-2].mode='ap'
+set wireless.@wifi-iface[-2].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-2].disassoc_low_ack='0'
+set wireless.@wifi-iface[-2].wps_pushbutton='0'
+set wireless.@wifi-iface[-2].network='lan'
+set wireless.@wifi-iface[-2].ssid='OpenWrt'
+set wireless.@wifi-iface[-2].key='password'
+set wireless.@wifi-iface[-2].ieee80211r='1'
+set wireless.@wifi-iface[-2].ft_over_ds='0'
+set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
+""","""
 set wireless.@wifi-device[0].disabled=1
 set wireless.@wifi-device[1].disabled=1
 
@@ -2188,7 +2234,7 @@ delete network.wan.ifname
 delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
-
+""","""
 set network.wan6.reqprefix='48'
 
 set network.lan.type='bridge'
@@ -2217,6 +2263,29 @@ set network.wan6.ifname='eth0.2'
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 
+set wireless.@wifi-iface[-1].disabled=0
+set wireless.@wifi-iface[-1].mode='ap'
+set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-1].disassoc_low_ack='0'
+set wireless.@wifi-iface[-1].wps_pushbutton='0'
+set wireless.@wifi-iface[-1].network='lan'
+set wireless.@wifi-iface[-1].ssid='OpenWrt'
+set wireless.@wifi-iface[-1].key='password'
+set wireless.@wifi-iface[-1].ieee80211r='1'
+set wireless.@wifi-iface[-1].ft_over_ds='0'
+set wireless.@wifi-iface[-1].ft_psk_generate_local='1'
+set wireless.@wifi-iface[-2].disabled=0
+set wireless.@wifi-iface[-2].mode='ap'
+set wireless.@wifi-iface[-2].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-2].disassoc_low_ack='0'
+set wireless.@wifi-iface[-2].wps_pushbutton='0'
+set wireless.@wifi-iface[-2].network='lan'
+set wireless.@wifi-iface[-2].ssid='OpenWrt'
+set wireless.@wifi-iface[-2].key='password'
+set wireless.@wifi-iface[-2].ieee80211r='1'
+set wireless.@wifi-iface[-2].ft_over_ds='0'
+set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
+""","""
 set wireless.@wifi-device[0].disabled=1
 set wireless.@wifi-device[1].disabled=1
 
@@ -2255,7 +2324,7 @@ delete network.wan.ifname
 delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
-
+""","""
 set network.wan6.reqprefix='48'
 
 set network.lan.type='bridge'
@@ -2307,6 +2376,29 @@ set network.wan6.ifname='eth0'
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 
+set wireless.@wifi-iface[-1].disabled=0
+set wireless.@wifi-iface[-1].mode='ap'
+set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-1].disassoc_low_ack='0'
+set wireless.@wifi-iface[-1].wps_pushbutton='0'
+set wireless.@wifi-iface[-1].network='lan'
+set wireless.@wifi-iface[-1].ssid='OpenWrt'
+set wireless.@wifi-iface[-1].key='password'
+set wireless.@wifi-iface[-1].ieee80211r='1'
+set wireless.@wifi-iface[-1].ft_over_ds='0'
+set wireless.@wifi-iface[-1].ft_psk_generate_local='1'
+set wireless.@wifi-iface[-2].disabled=0
+set wireless.@wifi-iface[-2].mode='ap'
+set wireless.@wifi-iface[-2].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-2].disassoc_low_ack='0'
+set wireless.@wifi-iface[-2].wps_pushbutton='0'
+set wireless.@wifi-iface[-2].network='lan'
+set wireless.@wifi-iface[-2].ssid='OpenWrt'
+set wireless.@wifi-iface[-2].key='password'
+set wireless.@wifi-iface[-2].ieee80211r='1'
+set wireless.@wifi-iface[-2].ft_over_ds='0'
+set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
+""","""
 set wireless.@wifi-device[0].disabled=1
 set wireless.@wifi-device[1].disabled=1
 
@@ -2349,7 +2441,7 @@ set dhcp.office.dhcpv6='server'
 set dhcp.office.ra='server'
 set dhcp.office.start='18'
 set dhcp.office.limit='14'
-
+""","""
 add firewall zone
 set firewall.@zone[-1].name='fw_office'
 set firewall.@zone[-1].network='office'
@@ -2380,7 +2472,7 @@ set dhcp.game.dhcpv6='server'
 set dhcp.game.ra='server'
 set dhcp.game.start='10'
 set dhcp.game.limit='6'
-
+""","""
 add firewall zone
 set firewall.@zone[-1].name='fw_game'
 set firewall.@zone[-1].network='game'
@@ -2407,7 +2499,7 @@ delete network.wan.ifname
 delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
-
+""","""
 set network.wan6.reqprefix='48'
 
 set network.lan.type='bridge'
@@ -2437,6 +2529,29 @@ set network.wan6.ifname='eth0'
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 
+set wireless.@wifi-iface[-1].disabled=0
+set wireless.@wifi-iface[-1].mode='ap'
+set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-1].disassoc_low_ack='0'
+set wireless.@wifi-iface[-1].wps_pushbutton='0'
+set wireless.@wifi-iface[-1].network='lan'
+set wireless.@wifi-iface[-1].ssid='OpenWrt'
+set wireless.@wifi-iface[-1].key='password'
+set wireless.@wifi-iface[-1].ieee80211r='1'
+set wireless.@wifi-iface[-1].ft_over_ds='0'
+set wireless.@wifi-iface[-1].ft_psk_generate_local='1'
+set wireless.@wifi-iface[-2].disabled=0
+set wireless.@wifi-iface[-2].mode='ap'
+set wireless.@wifi-iface[-2].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-2].disassoc_low_ack='0'
+set wireless.@wifi-iface[-2].wps_pushbutton='0'
+set wireless.@wifi-iface[-2].network='lan'
+set wireless.@wifi-iface[-2].ssid='OpenWrt'
+set wireless.@wifi-iface[-2].key='password'
+set wireless.@wifi-iface[-2].ieee80211r='1'
+set wireless.@wifi-iface[-2].ft_over_ds='0'
+set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
+""","""
 set wireless.@wifi-device[0].disabled=1
 set wireless.@wifi-device[1].disabled=1
 
@@ -2476,7 +2591,7 @@ delete network.wan.ifname
 delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
-
+""","""
 set network.wan6.reqprefix='48'
 
 set network.lan.type='bridge'
@@ -2535,6 +2650,29 @@ set network.wan6.ifname='eth0.2 eth4.2'
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 
+set wireless.@wifi-iface[-1].disabled=0
+set wireless.@wifi-iface[-1].mode='ap'
+set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-1].disassoc_low_ack='0'
+set wireless.@wifi-iface[-1].wps_pushbutton='0'
+set wireless.@wifi-iface[-1].network='lan'
+set wireless.@wifi-iface[-1].ssid='OpenWrt'
+set wireless.@wifi-iface[-1].key='password'
+set wireless.@wifi-iface[-1].ieee80211r='1'
+set wireless.@wifi-iface[-1].ft_over_ds='0'
+set wireless.@wifi-iface[-1].ft_psk_generate_local='1'
+set wireless.@wifi-iface[-2].disabled=0
+set wireless.@wifi-iface[-2].mode='ap'
+set wireless.@wifi-iface[-2].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-2].disassoc_low_ack='0'
+set wireless.@wifi-iface[-2].wps_pushbutton='0'
+set wireless.@wifi-iface[-2].network='lan'
+set wireless.@wifi-iface[-2].ssid='OpenWrt'
+set wireless.@wifi-iface[-2].key='password'
+set wireless.@wifi-iface[-2].ieee80211r='1'
+set wireless.@wifi-iface[-2].ft_over_ds='0'
+set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
+""","""
 set wireless.@wifi-device[0].disabled=1
 set wireless.@wifi-device[1].disabled=1
 
@@ -2579,7 +2717,7 @@ delete network.wan.ifname
 delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
-
+""","""
 set network.wan6.reqprefix='48'
 
 set network.lan.type='bridge'
@@ -2594,8 +2732,31 @@ set network.wan6.ifname='eth0.2 eth4.2'
 set wireless.@wifi-iface[-1].disabled=1
 set wireless.@wifi-iface[-2].disabled=1
 
-set wireless.@wifi-device[0].disabled=1
-set wireless.@wifi-device[1].disabled=1
+set wireless.@wifi-iface[-1].disabled=0
+set wireless.@wifi-iface[-1].mode='ap'
+set wireless.@wifi-iface[-1].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-1].disassoc_low_ack='0'
+set wireless.@wifi-iface[-1].wps_pushbutton='0'
+set wireless.@wifi-iface[-1].network='lan'
+set wireless.@wifi-iface[-1].ssid='OpenWrt'
+set wireless.@wifi-iface[-1].key='password'
+set wireless.@wifi-iface[-1].ieee80211r='1'
+set wireless.@wifi-iface[-1].ft_over_ds='0'
+set wireless.@wifi-iface[-1].ft_psk_generate_local='1'
+set wireless.@wifi-iface[-2].disabled=0
+set wireless.@wifi-iface[-2].mode='ap'
+set wireless.@wifi-iface[-2].encryption='psk2+ccmp'
+set wireless.@wifi-iface[-2].disassoc_low_ack='0'
+set wireless.@wifi-iface[-2].wps_pushbutton='0'
+set wireless.@wifi-iface[-2].network='lan'
+set wireless.@wifi-iface[-2].ssid='OpenWrt'
+set wireless.@wifi-iface[-2].key='password'
+set wireless.@wifi-iface[-2].ieee80211r='1'
+set wireless.@wifi-iface[-2].ft_over_ds='0'
+set wireless.@wifi-iface[-2].ft_psk_generate_local='1'
+""","""
+set wireless.@wifi-device[0].disabled=0
+set wireless.@wifi-device[1].disabled=0
 
 set network.coredata='interface'
 
@@ -2638,7 +2799,7 @@ delete network.wan.ifname
 delete network.wan6.device
 delete network.wan6.type
 delete network.wan6.ifname
-
+""","""
 set network.wan6.reqprefix='48'
 
 set network.lan.type='bridge'
