@@ -227,10 +227,6 @@ class ConfigDevice():
         L.debug("ConfigDevice::_reset device reset_config ...")
         self.device.reset_config(port_map)
 
-        if ('admin_password' in config_reset):
-            L.info("ConfigOpenwrt::reset setup root pw")
-            self.device.set_root_passwd(config_reset['admin_password'])
-
         return True
 
     def reset(self, config_reset):
@@ -424,6 +420,10 @@ def setup_network_equipment(configs, reset=True, command="layout"):
         if not ret:
             L.error("reset error")
             return False
+
+    if ('admin_password' in configs):
+        L.info("ConfigOpenwrt::reset setup root pw")
+        rt1.device.set_root_passwd(configs['admin_password'])
 
     if command == "reset":
         L.info("reset completed")
