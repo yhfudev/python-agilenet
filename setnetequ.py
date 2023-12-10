@@ -82,10 +82,6 @@ def factory_device(config_device):
                 L.error(f"The hardware switch is configured, but there's no 'CPU' entry in the port map.")
                 L.warning(f"The code will automatically revert to the configuration of no hardware switch.")
                 device.has_hw_switch = False
-            if not config_device['arg_port_map']['CPU'][0]:
-                L.error(f"The hardware switch is configured, but the port map for 'CPU' is not set up to a specific switch port.")
-                L.warning(f"The code will automatically revert to the configuration of no hardware switch.")
-                device.has_hw_switch = False
 
         if ('arg_is_gns3' in config_device) and config_device['arg_is_gns3']:
             device.is_gns3 = True
