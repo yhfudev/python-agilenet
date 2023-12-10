@@ -584,9 +584,10 @@ def get_hw_wifi_number(str_msg):
 #    }
 #  @param cb_vlan_ifname An alternate ifname callback function.
 #  @param is_dsa True if the board support Linux DSA
+#  @param isolate_to_lan True if need to connect isolated network to a null(lan) network to fix the WiFi connection of its network
 #  @param trunk_bridge_device_name the bridge for DSA interfaces
 #  @return a list of config command strings
-def getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname=None, num_wifi=0, is_dsa=False, create_wan=False, has_subnet_ips=True, default_passwd="", trunk_bridge_device_name = 'br-lan'):
+def getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname=None, num_wifi=0, is_dsa=False, create_wan=False, isolate_to_lan=False, has_subnet_ips=True, default_passwd="", trunk_bridge_device_name = 'br-lan'):
     # TODO: new DSA bridge-vlan
 
     #L.info("getconf_interfaces with cb = {0}".format(cb_vlan_ifname))
@@ -730,6 +731,26 @@ add firewall forwarding
 set firewall.@forwarding[-1].dest='{1}'
 set firewall.@forwarding[-1].src='fw_{0}'
 """.format(i, j)
+
+        else:
+            if isolate_to_lan:
+                # use default lan for the WiFi to work
+                cmd_intf += """
+add firewall zone
+set firewall.@zone[-1].name='fw_{0}'
+set firewall.@zone[-1].network='{0}'
+set firewall.@zone[-1].input='ACCEPT'
+set firewall.@zone[-1].output='ACCEPT'
+set firewall.@zone[-1].forward='REJECT'
+""".format(i)
+                ret_conf_list.append(cmd_intf); cmd_intf = ""
+                j = 'lan'
+                cmd_intf += """
+add firewall forwarding
+set firewall.@forwarding[-1].dest='{1}'
+set firewall.@forwarding[-1].src='fw_{0}'
+""".format(i, j)
+
         if cmd_intf and (not (cmd_intf == "")):
             ret_conf_list.append(cmd_intf); cmd_intf = ""
 
@@ -823,7 +844,7 @@ delete network.wan6
             # main router
             # set separated wan/lan
             ifname ='br-lan.2'
-            ifname = port_map["WAN"][0]
+            ifname = port_map["WAN"][1]
             cmd_intf += """
 set network.wan.device='{0}'
 set network.wan6.device='{0}'
@@ -1022,6 +1043,7 @@ class VlanPortGenerator():
 
     # get ifname port list for openwrt SW vlan
     #port_map = {
+    #//   name: [ switch_port, device, ]
     #    'CPU': [ None, None ],
     #    'WAN': [ 'eth0', 'eth0' ],
     #    '1': [ 'eth1', 'eth1' ],
@@ -1038,7 +1060,7 @@ class VlanPortGenerator():
         for i in range(0,len(self.vlan_list)):
             if not (self.port_list[i] in self.port_map):
                 continue
-            if not self.port_map[self.port_list[i]][0]:
+            if not self.port_map[self.port_list[i]][1]:
                 continue
             vlan1 = self.vlan_list[i]
             if not isinstance(vlan1, list):
@@ -1048,9 +1070,9 @@ class VlanPortGenerator():
                     if (vlanid in self.special_vlan_set) and (not self.port_list[i] == 'CPU'):
                         pass
                     else:
-                        str_ports += " {0}.{1}".format(self.port_map[self.port_list[i]][0], vlanid)
+                        str_ports += " {0}.{1}".format(self.port_map[self.port_list[i]][1], vlanid)
                 if v == vlanid:
-                    str_ports += " {0}".format(self.port_map[self.port_list[i]][0])
+                    str_ports += " {0}".format(self.port_map[self.port_list[i]][1])
         return str_ports.strip()
 
     # get the vlan port list for openwrt HW switch
@@ -1838,8 +1860,15 @@ head -n -0 /etc/resolv.* /tmp/resolv.*
             #     create_wan = True
         hostname = self.get_hostname()
 
+        # TP-Link Archer C7 v2 and TP-Link Archer C6 v2 (US) / A6 v2 (US/TW)
+        # the isolated network can't be accassed by WiFi,
+        # need to add a forward firewall policy from the network to a null(lan) network to make the WiFi works.
+        isolate_to_lan = False
+        if "tplink_archer-c" in self.get_model_name():
+            isolate_to_lan = True
+
         #L.debug(f"try to setup ipaddr_lan={ipaddr_lan}; interface_config={interface_config}; cb_vlan_ifname={cb_vlan_ifname}; num_wifi={num_wifi}")
-        cmd_list = getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname, num_wifi, is_dsa=self._is_dsa(), create_wan=create_wan, has_subnet_ips=has_subnet_ips, default_passwd=self.root_passwd, trunk_bridge_device_name = self.br_trunk)
+        cmd_list = getconf_list_interfaces(hostname, ipaddr_lan, interface_config, port_map, cb_vlan_ifname, num_wifi, is_dsa=self._is_dsa(), isolate_to_lan=isolate_to_lan, create_wan=create_wan, has_subnet_ips=has_subnet_ips, default_passwd=self.root_passwd, trunk_bridge_device_name = self.br_trunk)
         return execute_uci_command_list(self.pexp, prompt, cmd_list)
 
 
@@ -2175,8 +2204,8 @@ set network.wan6.device='wan'
                 # name: [vlan, ip/bit, wifi, wifi pw, [list of forward zone]]
                 "coredata": [  10, "10.1.1.0/29", "", "", []],
             }
-            port_map = { 'CPU': [ None, None ], 'WAN': ['wan', 'eth0'], '1': ['lan1', 'eth0'], '2': ['lan2', 'eth0'], '3': ['lan3', 'eth0'], '4': ['lan4', 'eth0'] }
-            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=None, num_wifi=2, is_dsa=True)
+            port_map = { 'CPU': [ None, None ], 'WAN': [1, 'wan'], '1': [2, 'lan1'], '2': [3, 'lan2'], '3': [4, 'lan3'], '4': [5, 'lan4'] }
+            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=None, num_wifi=2, is_dsa=True, isolate_to_lan=False)
             #L.debug("out=" + str(out))
             self.assertEqual(expect, out)
 
@@ -2264,7 +2293,7 @@ set network.wan6.ifname='eth0.2'
                 "coredata": [  10, "10.1.1.0/29", "", "", []],
             }
             port_map = { 'CPU': [0, 'eth0'], 'WAN': [1, 'eth0'], '1': [2, 'eth0'], '2': [3, 'eth0'], '3': [4, 'eth0'], '4': [5, 'eth0'] }
-            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=None, num_wifi=2)
+            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=None, num_wifi=2, isolate_to_lan=False)
             #L.debug("out=" + str(out))
             self.assertEqual(expect, out)
 
@@ -2381,7 +2410,7 @@ set network.wan6.ifname='eth0'
                             str_port += " {0}".format(port_map[port_list[i]][0])
                 return str_port.strip()
 
-            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test1, num_wifi=2)
+            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test1, num_wifi=2, isolate_to_lan=False)
             self.assertEqual(expect, out)
 
 
@@ -2532,7 +2561,7 @@ set network.wan6.ifname='eth0'
                 }
             port_list = [ 'CPU', 'WAN', '1', '2', '3', '4', ]
             vlan_list = [     0,     2,   1,  10,  20,  30, ]
-            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test1, num_wifi=2)
+            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test1, num_wifi=2, isolate_to_lan=False)
             self.assertEqual(expect, out)
 
         def test_getconf_interfaces_trunk_port2(self):
@@ -2651,7 +2680,7 @@ set network.wan6.ifname='eth0.2 eth4.2'
 
             port_list = [ 'CPU', 'WAN', '1', '2', '3', '4', ]
             vlan_list = [     0,     0,   1,  10,  20,   0, ]
-            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test2, num_wifi=2)
+            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test2, num_wifi=2, isolate_to_lan=False)
             self.assertEqual(expect, out)
 
 
@@ -2859,10 +2888,10 @@ set network.wan6.ifname='eth0.2 eth4.2'
 
             port_list = [ 'CPU', 'WAN', '1', '2', '3', '4', ]
             vlan_list = [     0,     0,   1,  10,  20,   0, ]
-            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test2, num_wifi=2, create_wan=True)
+            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test2, num_wifi=2, create_wan=True, isolate_to_lan=False)
             self.assertEqual(expect, out)
 
-            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test2, num_wifi=2, create_wan=True, has_subnet_ips=False)
+            out = getconf_list_interfaces("OpenWrt", "192.168.1.0/24", interface_config, port_map, cb_vlan_ifname=cb_vlan_ifname_test2, num_wifi=2, create_wan=True, isolate_to_lan=False, has_subnet_ips=False)
             self.assertEqual(expect2, out)
 
         def test_getconf_default_network(self):
