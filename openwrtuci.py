@@ -1138,7 +1138,7 @@ class OpenwrtSwitch(Switch):
             L.info("brought the network interfaces up.")
         time.sleep(2)
 
-    def _is_dsa(self):
+    def _is_dsa0(self):
         # if grep -sq DEVTYPE=dsa /sys/class/net/*/uevent; then echo "IsDSA"; else echo "NotDSA"; fi
         #self.pexp.sendcontrol('c')
         self.pexp.sendline("\r\n")
@@ -1146,6 +1146,12 @@ class OpenwrtSwitch(Switch):
         ret = self.pexp.expect(['IsDSA', 'NotDSA'])
         #L.debug(f"is_dsa?ret={ret}")
         return (ret == 0)
+
+    def _is_dsa(self):
+        swconf = self.get_swconfig()
+        if swconf:
+            return False
+        return True
 
     # get swconfig config
     def get_swconfig(self):
